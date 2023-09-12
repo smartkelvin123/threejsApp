@@ -3,6 +3,7 @@ import { Canvas, useFrame, useLoader } from "@react-three/fiber/native";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
 import { TextureLoader } from "expo-three";
+import { useAnimatedSensor, SensorType } from "react-native-reanimated";
 
 function Box(props) {
   const meshRef = useRef(null);
@@ -57,6 +58,14 @@ function Shoe() {
     });
   }, [obj]);
 
+  useFrame((state, delta) => {
+    let { x, y, z } = props.animatedSensor.sensor.value;
+    x = ~~(x * 100) / 5000;
+    y = ~~(y * 100) / 5000;
+    mesh.current.rotation.x += x;
+    mesh.current.rotation.y += y;
+  });
+
   return (
     <mesh rotation={[1, 0, 0]}>
       <primitive object={obj} scale={10} />
@@ -65,13 +74,19 @@ function Shoe() {
 }
 
 export default function App() {
+  const animatedSensor = useAnimatedSensor(SensorType.GYROSCOPE, {
+    interval: 100,
+  });
+
+  console.log(animatedSensor.sensor.value);
+
   return (
     <Canvas>
       <ambientLight />
       <pointLight position={[10, 10, 10]} />
 
       <Suspense fallback={null}>
-        <Shoe />
+        <Shoe animatedSensor={animatedSensor} />
       </Suspense>
 
       {/* <Box position={[0, -1, 0]} />
